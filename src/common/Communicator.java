@@ -7,7 +7,7 @@ import javax.naming.AuthenticationException;
 
 public interface Communicator extends Remote {
 
-	User login(String name) throws RemoteException, AuthenticationException;
+	User login(RemoteObserver observer, String name) throws RemoteException, AuthenticationException;
 
 	void logout(User user) throws RemoteException, AuthenticationException;
 

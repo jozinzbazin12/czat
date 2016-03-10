@@ -1,11 +1,13 @@
 package client;
 
 public enum Action {
-	LOGIN("login", "Loguje sie do serwera\nSkladnia: login ADRES NICK"), LOGOUT("logout", "Wylogowuje sie"), SEND("send",
-			"Wysyla wiadomosc do wszystkich\nSkladnia: send WIADOMOSC"), SEND_PRIV("send-priv",
-					"Wysyla prywatna wiadomosc do uzytkownika\nSkladnia: send-priv NICK WIADOMOSC"), EXIT("exit",
-							"Konczy prace programu"), HELP("help",
-									"help: Wyswietla dostepne komendy i instrukcje uzytkowania\nhelp AKCJA: wyswietla opis akcji");
+    
+	LOGIN("login", "Loguje sie do serwera\nSkladnia: login ADRES NICK"),
+        LOGOUT("logout", "Wylogowuje sie"),
+        SEND("send","Wysyla wiadomosc do wszystkich\nSkladnia: send WIADOMOSC"),
+        SEND_PRIV("send-priv","Wysyla prywatna wiadomosc do uzytkownika\nSkladnia: send-priv NICK WIADOMOSC"),
+        EXIT("exit","Konczy prace programu"),
+        HELP("help","help: Wyswietla dostepne komendy i instrukcje uzytkowania\nhelp AKCJA: wyswietla opis akcji");
 
 	private String command;
 
@@ -19,7 +21,6 @@ public enum Action {
 	public String getCommand() {
 		return command;
 	}
-
 	public String getHelp() {
 		return help;
 	}

@@ -10,14 +10,21 @@ import java.util.Scanner;
 import javax.naming.AuthenticationException;
 
 import common.Communicator;
+import common.RemoteObserver;
 import common.User;
+import java.rmi.server.UnicastRemoteObject;
 
-public class Client {
+public class Client extends UnicastRemoteObject implements RemoteObserver  {
 
 	private static final String SYNTAX_ERROR = "Niepoprawna skladnia komendy, uzyj \"help\", aby sprawdzic dostepne komendy";
 	private static Scanner sc;
 	private static Communicator server;
 	private static User user;
+        
+        public Client() throws RemoteException       
+        {
+            super();
+        }
 
 	@SuppressWarnings("deprecation")
 	public static void main(String[] args) throws RemoteException, MalformedURLException, NotBoundException {
@@ -116,12 +123,18 @@ public class Client {
 		}
 		StringBuilder name = new StringBuilder();
 		name.append("//").append(line[1]).append(":1099/Communicator");
-		server = (Communicator) Naming.lookup(name.toString());
-		user = server.login(line[2]);
+		server = (Communicator) Naming.lookup("Communicator");   //changed for work purpose
+                Client remoteClient = new Client();
+		user = server.login(remoteClient,line[2]);
 		if (user != null) {
 			System.out.println("Zalogowano do " + line[1]);
 		}
 	}
+
+    @Override
+    public void update(Object observable, Object updateMsg) throws RemoteException {
+        System.out.println(updateMsg);    // shows the observed message 
+    }
 }
 
 // -Djava.security.policy=file:${workspace_loc}/RMI/src/client/security.policy
