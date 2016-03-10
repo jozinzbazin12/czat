@@ -128,7 +128,8 @@ public class Client extends UnicastRemoteObject implements RemoteObserver  {
 		user = server.login(remoteClient,line[2]);
 		if (user != null) {
 			System.out.println("Zalogowano do " + line[1]);
-		}
+		} 
+                
 	}
 
     @Override

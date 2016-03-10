@@ -10,7 +10,7 @@ public enum Action {
         HELP("help","help: Wyswietla dostepne komendy i instrukcje uzytkowania\nhelp AKCJA: wyswietla opis akcji");
 
 	private String command;
-
+ 
 	private String help;
 
 	private Action(String command, String help) {
@@ -33,5 +33,8 @@ public enum Action {
 		}
 		return null;
 	}
+        
+        
+        
 
 }
