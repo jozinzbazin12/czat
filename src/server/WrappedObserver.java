@@ -44,4 +44,9 @@ class WrappedObserver implements Observer, Serializable {
 		return user;
 	}
 
+	@Override
+	public String toString() {
+		return user.toString();
+	}
+
 }

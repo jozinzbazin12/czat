@@ -17,7 +17,6 @@ import common.User;
 public class CommunicatorServerImpl extends Observable implements Communicator {
 
 	private static final long MAX_IDLE_TIME = 600000;
-	private Map<String, User> connectedUsers = new ConcurrentHashMap<>();
 	private Map<String, WrappedObserver> observersMap = new ConcurrentHashMap<>();
 	private volatile static SimpleDateFormat dateformat = new SimpleDateFormat("[dd.MM.yyyy HH:mm:ss]");
 	private Thread janitor;
@@ -27,10 +26,10 @@ public class CommunicatorServerImpl extends Observable implements Communicator {
 			@Override
 			public void run() {
 				while (true) {
-					Iterator<Map.Entry<String, User>> iter = connectedUsers.entrySet().iterator();
+					Iterator<Map.Entry<String, WrappedObserver>> iter = observersMap.entrySet().iterator();
 					while (iter.hasNext()) {
-						Map.Entry<String, User> entry = iter.next();
-						if (System.currentTimeMillis() - entry.getValue().getLastTime() > MAX_IDLE_TIME) {
+						Map.Entry<String, WrappedObserver> entry = iter.next();
+						if (System.currentTimeMillis() - entry.getValue().getUser().getLastTime() > MAX_IDLE_TIME) {
 							StringBuilder str = new StringBuilder();
 							str.append("Usuwam uzytkownika ").append(entry.getKey()).append(" z powodu bezczynnosci");
 							sendServerMessage(str.toString());
@@ -50,14 +49,12 @@ public class CommunicatorServerImpl extends Observable implements Communicator {
 
 	@Override
 	public User login(RemoteObserver o, String name) throws RemoteException, AuthenticationException {
-		if (connectedUsers.get(name) != null) {
+		if (observersMap.get(name) != null) {
 			throw new AuthenticationException("Uzytkownik juz istnieje!");
 		}
 
 		User u = new User(name);
-		connectedUsers.put(name, u);
-		WrappedObserver mo = new WrappedObserver(o, null);
-
+		WrappedObserver mo = new WrappedObserver(o, u);
 		addObserver(mo); // Observer on new User achieved
 		observersMap.put(name, mo);
 
@@ -75,17 +72,18 @@ public class CommunicatorServerImpl extends Observable implements Communicator {
 	@Override
 	public void send(String message, String to, User user) throws RemoteException, AuthenticationException {
 		authenticate(user);
-		User toUser = connectedUsers.get(to);
+		WrappedObserver toUser = observersMap.get(to);
 		if (toUser == null) {
 			throw new RemoteException("Nie ma takiego uzytkownika");
 		}
-		sendPriv(message, user, toUser);
+		WrappedObserver fromUser = observersMap.get(user.getName());
+		sendPriv(message, fromUser, toUser);
 	}
 
 	@Override
 	public void logout(RemoteObserver observer, User user) throws RemoteException, AuthenticationException {
-		if (connectedUsers.get(user.getName()) != null) {
-			connectedUsers.remove(user.getName());
+		if (observersMap.get(user.getName()) != null) {
+			observersMap.remove(user.getName());
 			notifyMessage(user.getName() + " opuscil‚ czat");
 		}
 		String observerName = observer.getName();
@@ -96,16 +94,16 @@ public class CommunicatorServerImpl extends Observable implements Communicator {
 
 	@Override
 	public void getUsersList(RemoteObserver observer) throws RemoteException, AuthenticationException {
-		String message = buildServerMessage("Uzytkownicy: " + connectedUsers.values().toString());
+		String message = buildServerMessage("Uzytkownicy: " + observersMap.values().toString());
 		observer.update(this, message);
 	}
 
 	private void authenticate(User u) throws AuthenticationException {
-		User user = connectedUsers.get(u.getName());
+		WrappedObserver user = observersMap.get(u.getName());
 		if (user == null) {
 			throw new AuthenticationException("Nie jestes zalogowany");
 		}
-		user.update();
+		user.getUser().update();
 	}
 
 	private void notifyMessage(String message) {
@@ -116,13 +114,14 @@ public class CommunicatorServerImpl extends Observable implements Communicator {
 	private String buildMessage(User from, String msg) {
 		String dateString = dateformat.format(new Date());
 		StringBuilder str = new StringBuilder();
-		str.append(dateString).append(" ").append(from.getName()).append(") - ").append(msg);
+		str.append(dateString).append(" (").append(from.getName()).append(") - ").append(msg);
 		return str.toString();
 	}
 
-	public void sendPriv(String msg, User from, User toUser) {
-		String str = "[PRIV] " + buildMessage(from, msg);
-		notifyObservers(str);
+	public void sendPriv(String msg, WrappedObserver fromUser, WrappedObserver toUser) {
+		String str = "[PRIV] " + buildMessage(fromUser.getUser(), msg);
+		fromUser.update(this, str);
+		toUser.update(this, str);
 	}
 
 	private String buildServerMessage(String message) {
