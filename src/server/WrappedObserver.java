@@ -20,7 +20,7 @@ class WrappedObserver implements Observer, Serializable {
         private static final long serialVersionUID = 1L;
 
         private RemoteObserver ro = null;
-
+        
         public WrappedObserver(RemoteObserver ro) {
             this.ro = ro;
         }

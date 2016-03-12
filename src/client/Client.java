@@ -1,18 +1,16 @@
 package client;
 
+import common.Communicator;
+import common.RemoteObserver;
+import common.User;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
-import java.util.Scanner;
-
-import javax.naming.AuthenticationException;
-
-import common.Communicator;
-import common.RemoteObserver;
-import common.User;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Scanner;
+import javax.naming.AuthenticationException;
 
 public class Client extends UnicastRemoteObject implements RemoteObserver  {
 
@@ -20,6 +18,7 @@ public class Client extends UnicastRemoteObject implements RemoteObserver  {
 	private static Scanner sc;
 	private static Communicator server;
 	private static User user;
+        private static Client remoteClient;
         
         public Client() throws RemoteException       
         {
@@ -73,7 +72,8 @@ public class Client extends UnicastRemoteObject implements RemoteObserver  {
 					break;
 				}
 			} catch (AuthenticationException | RemoteException e) {
-				e.printStackTrace();
+				//e.printStackTrace();
+                                System.out.println(e.getMessage());
 			}
 		}
 	}
@@ -99,8 +99,14 @@ public class Client extends UnicastRemoteObject implements RemoteObserver  {
 			System.out.println(SYNTAX_ERROR);
 			return;
 		}
-		server.send(line[1], user);
-	}
+                
+                try{
+                    server.send(line[1], user);
+                }catch(NullPointerException e){                    
+                    System.out.println("Nie jestes zalogowany");
+                }
+		
+                }
 
 	private static void sendPriv(String[] line) throws AuthenticationException, RemoteException {
 		if (line.length != 3) {
@@ -111,7 +117,7 @@ public class Client extends UnicastRemoteObject implements RemoteObserver  {
 	}
 
 	private static void logout() throws AuthenticationException, RemoteException {
-		server.logout(user);
+		server.logout(remoteClient,user);
 
 	}
 
@@ -124,7 +130,7 @@ public class Client extends UnicastRemoteObject implements RemoteObserver  {
 		StringBuilder name = new StringBuilder();
 		name.append("//").append(line[1]).append(":1099/Communicator");
 		server = (Communicator) Naming.lookup("Communicator");   //changed for work purpose
-                Client remoteClient = new Client();
+                remoteClient = new Client();
 		user = server.login(remoteClient,line[2]);
 		if (user != null) {
 			System.out.println("Zalogowano do " + line[1]);
@@ -135,6 +141,11 @@ public class Client extends UnicastRemoteObject implements RemoteObserver  {
     @Override
     public void update(Object observable, Object updateMsg) throws RemoteException {
         System.out.println(updateMsg);    // shows the observed message 
+    }
+
+    @Override
+    public String getName() {
+        return user.getName();
     }
 }
 
