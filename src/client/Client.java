@@ -12,25 +12,28 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.Scanner;
 import javax.naming.AuthenticationException;
 
-public class Client extends UnicastRemoteObject implements RemoteObserver  {
+public class Client extends UnicastRemoteObject implements RemoteObserver {
 
+	private static final long serialVersionUID = 7240745763804587458L;
 	private static final String SYNTAX_ERROR = "Niepoprawna skladnia komendy, uzyj \"help\", aby sprawdzic dostepne komendy";
 	private static Scanner sc;
 	private static Communicator server;
 	private static User user;
-        private static Client remoteClient;
-        
-        public Client() throws RemoteException       
-        {
-            super();
-        }
+	private static Client remoteClient;
+	private static int port = 1098;
+
+	public Client() throws RemoteException {
+		super();
+	}
 
 	@SuppressWarnings("deprecation")
 	public static void main(String[] args) throws RemoteException, MalformedURLException, NotBoundException {
 		if (System.getSecurityManager() == null) {
 			System.setSecurityManager(new RMISecurityManager());
 		}
-
+		if (args.length > 0) {
+			port = Integer.parseInt(args[0]);
+		}
 		parseAction();
 		if (sc != null) {
 			sc.close();
@@ -72,8 +75,8 @@ public class Client extends UnicastRemoteObject implements RemoteObserver  {
 					break;
 				}
 			} catch (AuthenticationException | RemoteException e) {
-				//e.printStackTrace();
-                                System.out.println(e.getMessage());
+				// e.printStackTrace();
+				System.out.println(e.getMessage());
 			}
 		}
 	}
@@ -99,14 +102,14 @@ public class Client extends UnicastRemoteObject implements RemoteObserver  {
 			System.out.println(SYNTAX_ERROR);
 			return;
 		}
-                
-                try{
-                    server.send(line[1], user);
-                }catch(NullPointerException e){                    
-                    System.out.println("Nie jestes zalogowany");
-                }
-		
-                }
+
+		try {
+			server.send(line[1], user);
+		} catch (NullPointerException e) {
+			System.out.println("Nie jestes zalogowany");
+		}
+
+	}
 
 	private static void sendPriv(String[] line) throws AuthenticationException, RemoteException {
 		if (line.length != 3) {
@@ -117,7 +120,7 @@ public class Client extends UnicastRemoteObject implements RemoteObserver  {
 	}
 
 	private static void logout() throws AuthenticationException, RemoteException {
-		server.logout(remoteClient,user);
+		server.logout(remoteClient, user);
 
 	}
 
@@ -128,25 +131,25 @@ public class Client extends UnicastRemoteObject implements RemoteObserver  {
 			return;
 		}
 		StringBuilder name = new StringBuilder();
-		name.append("//").append(line[1]).append(":1099/Communicator");
-		server = (Communicator) Naming.lookup("Communicator");   //changed for work purpose
-                remoteClient = new Client();
-		user = server.login(remoteClient,line[2]);
+		name.append("//").append(line[1]).append(":").append(port).append("/Communicator");
+		server = (Communicator) Naming.lookup(name.toString());
+		remoteClient = new Client();
+		user = server.login(remoteClient, line[2]);
 		if (user != null) {
 			System.out.println("Zalogowano do " + line[1]);
-		} 
-                
+		}
+
 	}
 
-    @Override
-    public void update(Object observable, Object updateMsg) throws RemoteException {
-        System.out.println(updateMsg);    // shows the observed message 
-    }
+	@Override
+	public void update(Object observable, Object updateMsg) throws RemoteException {
+		System.out.println(updateMsg); // shows the observed message
+	}
 
-    @Override
-    public String getName() {
-        return user.getName();
-    }
+	@Override
+	public String getName() {
+		return user.getName();
+	}
 }
 
 // -Djava.security.policy=file:${workspace_loc}/RMI/src/client/security.policy

@@ -1,21 +1,19 @@
 package server;
 
+import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Observable;
+
+import javax.naming.AuthenticationException;
+
 import common.Communicator;
 import common.RemoteObserver;
 import common.User;
-import java.rmi.RemoteException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Observable;
-import javax.naming.AuthenticationException;
 
 public class CommunicatorServerImpl extends Observable implements Communicator {
-
-    private static final long serialVersionUID = -6469696327068073544L;
 
     private Map<String, User> connectedUsers = new HashMap<>();
     private Map<String, WrappedObserver> observersMap = new HashMap<>();
@@ -35,7 +33,7 @@ public class CommunicatorServerImpl extends Observable implements Communicator {
 
         addObserver(mo);                    //Observer on new User achieved
         observersMap.put(name, mo);
-        notifyMessage(name + " dołączył do czatu");
+        notifyMessage(name + " dolaczyl� do czatu");
 
         return u;
     }
@@ -43,16 +41,14 @@ public class CommunicatorServerImpl extends Observable implements Communicator {
     @Override
     public void send(String message, User user) throws RemoteException, AuthenticationException {
         authenticate(user);
-
         notifyMessage(user.getName() + ": " + message);
     }
 
     @Override
     public void logout(RemoteObserver observer, User user) throws RemoteException, AuthenticationException {
-
         if (connectedUsers.get(user.getName()) != null) {
             connectedUsers.remove(user.getName());
-            notifyMessage(user.getName() + " opóścił czat");
+            notifyMessage(user.getName() + " opuscil� czat");
         }
         String observerName = observer.getName();
         WrappedObserver wo = observersMap.get(observerName);
@@ -76,7 +72,6 @@ public class CommunicatorServerImpl extends Observable implements Communicator {
     }
 
     private void notifyMessage(String message) {
-
         setChanged();
         StringBuilder sb = new StringBuilder();
         sb.append(new SimpleDateFormat("HH:mm:ss yyyy:MM:dd").format(Calendar.getInstance().getTime()) + " ");
