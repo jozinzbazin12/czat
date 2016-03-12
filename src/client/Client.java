@@ -1,8 +1,5 @@
 package client;
 
-import common.Communicator;
-import common.RemoteObserver;
-import common.User;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -10,7 +7,12 @@ import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Scanner;
+
 import javax.naming.AuthenticationException;
+
+import common.Communicator;
+import common.RemoteObserver;
+import common.User;
 
 public class Client extends UnicastRemoteObject implements RemoteObserver {
 
@@ -20,7 +22,6 @@ public class Client extends UnicastRemoteObject implements RemoteObserver {
 	private static Communicator server;
 	private static User user;
 	private static Client remoteClient;
-	private static int port = 1098;
 
 	public Client() throws RemoteException {
 		super();
@@ -30,9 +31,6 @@ public class Client extends UnicastRemoteObject implements RemoteObserver {
 	public static void main(String[] args) throws RemoteException, MalformedURLException, NotBoundException {
 		if (System.getSecurityManager() == null) {
 			System.setSecurityManager(new RMISecurityManager());
-		}
-		if (args.length > 0) {
-			port = Integer.parseInt(args[0]);
 		}
 		parseAction();
 		if (sc != null) {
@@ -56,23 +54,28 @@ public class Client extends UnicastRemoteObject implements RemoteObserver {
 					continue;
 				}
 				switch (action) {
-				case HELP:
-					help(line);
-					break;
-				case EXIT:
-					return;
-				case LOGIN:
-					login(line);
-					break;
-				case LOGOUT:
-					logout();
-					break;
-				case SEND:
-					send(line);
-					break;
-				case SEND_PRIV:
-					sendPriv(line);
-					break;
+					case HELP:
+						help(line);
+						break;
+					case EXIT:
+						return;
+					case LOGIN:
+						login(line);
+						break;
+					case LOGOUT:
+						logout();
+						break;
+					case SEND:
+						send(line);
+						break;
+					case SEND_PRIV:
+						sendPriv(line);
+						break;
+					case GET_USERS:
+						server.getUsersList(remoteClient);
+						break;
+					default:
+						break;
 				}
 			} catch (AuthenticationException | RemoteException e) {
 				// e.printStackTrace();
@@ -94,7 +97,6 @@ public class Client extends UnicastRemoteObject implements RemoteObserver {
 			}
 			System.out.println(str.toString());
 		}
-
 	}
 
 	private static void send(String[] line) throws AuthenticationException, RemoteException {
@@ -108,7 +110,6 @@ public class Client extends UnicastRemoteObject implements RemoteObserver {
 		} catch (NullPointerException e) {
 			System.out.println("Nie jestes zalogowany");
 		}
-
 	}
 
 	private static void sendPriv(String[] line) throws AuthenticationException, RemoteException {
@@ -121,24 +122,25 @@ public class Client extends UnicastRemoteObject implements RemoteObserver {
 
 	private static void logout() throws AuthenticationException, RemoteException {
 		server.logout(remoteClient, user);
-
 	}
 
-	private static void login(String[] line)
-			throws AuthenticationException, RemoteException, MalformedURLException, NotBoundException {
+	private static void login(String[] line) throws AuthenticationException, RemoteException, MalformedURLException {
 		if (line.length != 3) {
 			System.out.println(SYNTAX_ERROR);
 			return;
 		}
 		StringBuilder name = new StringBuilder();
-		name.append("//").append(line[1]).append(":").append(port).append("/Communicator");
-		server = (Communicator) Naming.lookup(name.toString());
+		name.append("//").append(line[1]).append("/Communicator");
+		try {
+			server = (Communicator) Naming.lookup(name.toString());
+		} catch (NotBoundException e) {
+			e.printStackTrace();
+		}
 		remoteClient = new Client();
 		user = server.login(remoteClient, line[2]);
 		if (user != null) {
 			System.out.println("Zalogowano do " + line[1]);
 		}
-
 	}
 
 	@Override
