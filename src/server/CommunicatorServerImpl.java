@@ -8,6 +8,13 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.rmi.ssl.SslRMIClientSocketFactory;
+import javax.rmi.ssl.SslRMIServerSocketFactory;
+
 import javax.naming.AuthenticationException;
 
 import common.Communicator;
@@ -45,6 +52,7 @@ public class CommunicatorServerImpl extends Observable implements Communicator {
 			}
 		};
 		janitor.start();
+                
 	}
 
 	@Override
@@ -84,7 +92,7 @@ public class CommunicatorServerImpl extends Observable implements Communicator {
 	public void logout(RemoteObserver observer, User user) throws RemoteException, AuthenticationException {
 		if (observersMap.get(user.getName()) != null) {
 			observersMap.remove(user.getName());
-			notifyMessage(user.getName() + " opuscil‚ czat");
+			notifyMessage(user.getName() + " opuscilï¿½ czat");
 		}
 		String observerName = observer.getName();
 		WrappedObserver wo = observersMap.get(observerName);
