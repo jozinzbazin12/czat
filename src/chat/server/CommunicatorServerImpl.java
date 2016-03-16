@@ -1,4 +1,4 @@
-package server;
+package chat.server;
 
 import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
@@ -15,11 +15,11 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.rmi.ssl.SslRMIClientSocketFactory;
 import javax.rmi.ssl.SslRMIServerSocketFactory;
 
-import javax.naming.AuthenticationException;
+import chat.common.Communicator;
+import chat.common.RemoteObserver;
+import chat.common.User;
 
-import common.Communicator;
-import common.RemoteObserver;
-import common.User;
+import javax.naming.AuthenticationException;
 
 public class CommunicatorServerImpl extends Observable implements Communicator {
 
@@ -52,7 +52,7 @@ public class CommunicatorServerImpl extends Observable implements Communicator {
 			}
 		};
 		janitor.start();
-                
+
 	}
 
 	@Override
@@ -90,20 +90,22 @@ public class CommunicatorServerImpl extends Observable implements Communicator {
 
 	@Override
 	public void logout(RemoteObserver observer, User user) throws RemoteException, AuthenticationException {
-		if (observersMap.get(user.getName()) != null) {			
-			notifyMessage(user.getName() + " opuscil� czat");
+		if (observersMap.get(user.getName()) != null) {
+			notifyMessage(user.getName() + " opuscil czat");
 		}
 		String observerName = observer.getName();
 		WrappedObserver wo = observersMap.get(observerName);
-                observersMap.remove(user.getName());
+		observersMap.remove(user.getName());
 		deleteObserver(wo);
 
 	}
 
 	@Override
-	public void getUsersList(RemoteObserver observer) throws RemoteException, AuthenticationException {
+	public void getUsersList(User user) throws RemoteException, AuthenticationException {
+		authenticate(user);
 		String message = buildServerMessage("Uzytkownicy: " + observersMap.values().toString());
-		observer.update(this, message);
+		WrappedObserver wrappedObserver = observersMap.get(user.getName());
+		wrappedObserver.update(this, message);
 	}
 
 	private void authenticate(User u) throws AuthenticationException {

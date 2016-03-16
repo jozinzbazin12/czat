@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package server;
+package chat.server;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.Observable;
 import java.util.Observer;
 
-import common.RemoteObserver;
-import common.User;
+import chat.common.RemoteObserver;
+import chat.common.User;
 
 /**
  *

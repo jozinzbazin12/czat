@@ -1,4 +1,4 @@
-package common;
+package chat.common;
 
 import java.io.Serializable;
 

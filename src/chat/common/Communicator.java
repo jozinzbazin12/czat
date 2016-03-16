@@ -1,4 +1,4 @@
-package common;
+package chat.common;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -14,6 +14,6 @@ public interface Communicator extends Remote {
 
 	void send(String message, String to, User user) throws RemoteException, AuthenticationException;
 
-	void getUsersList(RemoteObserver observer) throws RemoteException, AuthenticationException;
+	void getUsersList(User user) throws RemoteException, AuthenticationException;
 
 }

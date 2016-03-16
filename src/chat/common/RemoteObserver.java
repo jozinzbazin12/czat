@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package common;
+package chat.common;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
