@@ -39,7 +39,7 @@ public class Server {
 		String pass = "password";
 		System.setProperty("javax.net.ssl.debug", "all");
 		System.setProperty("javax.net.ssl.keyStore", "src/chat/server/ssl_keys/keystore-server.jks");
-		System.setProperty("javax.net.ssl.trustStore", "src/chat/server/rssl_keys/truststore-server.jks");
+		System.setProperty("javax.net.ssl.trustStore", "src/chat/server/ssl_keys/truststore-server.jks");
 
 		System.setProperty("javax.net.ssl.keyStorePassword", pass);
 		System.setProperty("javax.net.ssl.trustStorePassword", pass);
