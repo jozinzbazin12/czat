@@ -68,10 +68,10 @@ public class Client extends UnicastRemoteObject implements RemoteObserver {
 					logout();
 					break;
 				case SEND:
-					send(line);
+					send(line, input);
 					break;
 				case SEND_PRIV:
-					sendPriv(line);
+					sendPriv(line, input);
 					break;
 				case GET_USERS:
 					server.getUsersList(user);
@@ -100,25 +100,26 @@ public class Client extends UnicastRemoteObject implements RemoteObserver {
 		}
 	}
 
-	private static void send(String[] line) throws AuthenticationException, RemoteException {
-		if (line.length != 2) {
+	private static void send(String[] array, String line) throws AuthenticationException, RemoteException {
+		String[] text = line.split(" ", 2);
+		if (text.length != 2) {
 			System.out.println(SYNTAX_ERROR);
 			return;
 		}
-
 		try {
-			server.send(line[1], user);
+			server.send(text[1], user);
 		} catch (NullPointerException e) {
 			System.out.println("Nie jestes zalogowany");
 		}
 	}
 
-	private static void sendPriv(String[] line) throws AuthenticationException, RemoteException {
-		if (line.length != 3) {
+	private static void sendPriv(String[] array, String line) throws AuthenticationException, RemoteException {
+		String[] text = line.split(" ", 3);
+		if (text.length != 3) {
 			System.out.println(SYNTAX_ERROR);
 			return;
 		}
-		server.send(line[2], line[1], user);
+		server.send(text[2], text[1], user);
 	}
 
 	private static void logout() throws AuthenticationException, RemoteException {

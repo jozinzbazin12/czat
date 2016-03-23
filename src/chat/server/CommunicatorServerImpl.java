@@ -91,7 +91,8 @@ public class CommunicatorServerImpl extends Observable implements Communicator {
 	@Override
 	public void logout(RemoteObserver observer, User user) throws RemoteException, AuthenticationException {
 		if (observersMap.get(user.getName()) != null) {
-			notifyMessage(user.getName() + " opuscil czat");
+			String message = buildServerMessage(user.getName() + " opuscil czat");
+			notifyMessage(message);
 		}
 		String observerName = observer.getName();
 		WrappedObserver wo = observersMap.get(observerName);
